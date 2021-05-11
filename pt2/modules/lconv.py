@@ -10,7 +10,7 @@ from torch import nn
 MIN_VALUE = float(numpy.finfo(numpy.float32).min)
 
 
-class LConvBlock(nn.Module):
+class LConv(nn.Module):
     """Lightweight Convolution layer.
 
     This implementation is based on
@@ -36,7 +36,7 @@ class LConvBlock(nn.Module):
         use_bias=False,
     ):
         """Construct Lightweight Convolution layer."""
-        super(LConvBlock, self).__init__()
+        super(LConv, self).__init__()
 
         assert n_feat % wshare == 0
         self.wshare = wshare
@@ -110,4 +110,27 @@ class LConvBlock(nn.Module):
 
         # second linear layer
         x = self.linear2(x)
+        return x
+
+
+class LConvBlock(torch.nn.Module):
+    def __init__(self, dim, kernel_size, dropout_rate):
+        super().__init__()
+
+        self.glu = torch.nn.GLU()
+        self.lconv = LConv(8, dim, dropout_rate, kernel_size)
+        self.fc1 = torch.nn.Linear(dim, dim*4)
+        self.fc2 = torch.nn.Linear(dim*4, dim)
+
+    def forward(self, x, mask):
+        x_res = x
+        x = self.lconv(x, None, None, mask=mask)
+        x = x + x_res
+
+        x_res = x
+        x = self.fc1(x)
+        x = torch.relu(x)
+        x = self.fc2(x)
+        x = x + x_res
+
         return x
