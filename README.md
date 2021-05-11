@@ -21,3 +21,27 @@ cd Parallel-Tacotron-2
 pip3 install -e .
 ```
 
+
+## Prepare LJSpeech dataset
+
+```sh
+sudo apt-get install espeak-ng # phonemizer backend
+pip3 install phonemizer # to convert text to phonemes
+bash ./scripts/prepare_ljs_dataset.sh
+```
+
+The prepared dataset:
+
+```
+dataset/
+├── LJSpeech-1.1
+│   ├── filenames.txt
+│   ├── metadata.csv
+│   ├── phonemes.txt
+│   ├── README
+│   ├── transcript.txt
+│   └── wavs
+│       ├── LJ001-0001.wav
+│       ├── LJ001-0002.wav
+```
+
